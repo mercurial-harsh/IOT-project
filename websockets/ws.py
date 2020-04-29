@@ -4,15 +4,31 @@
 
 import asyncio
 import websockets
+import requests
+import json
+
+
+
 
 async def hello(websocket, path):
-    name = await websocket.recv()
-    print(f"< {name}")
+    iotId = await websocket.recv()
+    print(iotId)
+      
+    response=requests.get(f"https://us-central1-iot-upes.cloudfunctions.net/webhookNew/iots/{iotId}")
+    
+        
+    if response.status_code == 200 :
 
-    greeting = f"Hello {name}!"
+        data=response.json()
+        state=data["status"]
+    else :
+            
+        state="wait a second"
+    
+     
 
-    await websocket.send(greeting)
-    print(f"> {greeting}")
+    await websocket.send(state)
+    #print(f"> {greeting}")
 
 start_server = websockets.serve(hello, "192.168.43.118", 8765)
 
